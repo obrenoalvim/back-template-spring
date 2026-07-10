@@ -2,6 +2,7 @@ package com.example.backtemplate.auth;
 
 import com.example.backtemplate.auth.dto.ForgotPasswordRequest;
 import com.example.backtemplate.auth.dto.LoginRequest;
+import com.example.backtemplate.auth.dto.LogoutRequest;
 import com.example.backtemplate.auth.dto.RefreshRequest;
 import com.example.backtemplate.auth.dto.RegisterRequest;
 import com.example.backtemplate.auth.dto.ResetPasswordRequest;
@@ -44,6 +45,12 @@ public class AuthController {
   @PostMapping("/refresh")
   public TokenResponse refresh(@Valid @RequestBody RefreshRequest req) {
     return authService.refresh(req);
+  }
+
+  @Operation(summary = "Revoke a refresh token")
+  @PostMapping("/logout")
+  public void logout(@Valid @RequestBody LogoutRequest req) {
+    authService.logout(req);
   }
 
   @Operation(summary = "Request a password reset email")

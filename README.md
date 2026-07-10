@@ -47,6 +47,12 @@ docker compose up -d --build
 
 Every user has a `role` (`USER` | `ADMIN`, default `USER`), carried as a signed claim in the JWT (`JwtService.generateAccessToken`) and turned into a `ROLE_*` `GrantedAuthority` by `JwtAuthFilter` — never trust a `role` from a request body. `GET /admin/users` is the reference for protecting a route: `@PreAuthorize("hasRole('ADMIN')")` (needs `@EnableMethodSecurity` on `SecurityConfig`, already added). No self-serve way to become admin — flip the column directly (`UPDATE users SET role = 'ADMIN' WHERE email = '...'`) for local testing.
 
+## Sessions
+
+`login`/`refresh` return `{ accessToken, refreshToken }` — both JWTs (`JwtService`), but the refresh token also gets a SHA-256 hash of itself persisted in the `refresh_tokens` table so it can actually be revoked (a bare stateless JWT can't be un-issued before it expires). Access-token validation on every other request stays fully stateless — the DB lookup only happens on the `/auth/refresh` and `/auth/logout` paths.
+
+`refresh` **rotates**: the old row is deleted the moment a new pair is issued, so a stolen-and-replayed refresh token stops working right after the legitimate client's next refresh. `logout` revokes a refresh token outright (idempotent — a missing/already-revoked one still returns 200). Note the refresh JWT carries a random `jti` claim — without one, two tokens minted for the same user within the same second would be byte-identical (JWT claims are second-precision), which would silently defeat rotation.
+
 ## API documentation
 
 OpenAPI docs are generated from Bean Validation annotations and [springdoc-openapi](https://springdoc.org/) `@Tag`/`@Operation`/`@SecurityRequirement` annotations on controllers. With the app running, open `http://localhost:8081/swagger-ui/index.html` for the interactive Swagger UI (raw spec at `/v3/api-docs`). Use the "Authorize" button with a JWT from `/auth/login` to try protected routes (`account`, `api/notes`).

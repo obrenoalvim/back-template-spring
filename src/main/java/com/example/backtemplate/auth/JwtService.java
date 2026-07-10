@@ -42,6 +42,11 @@ public class JwtService {
     return Jwts.builder()
         .subject(userId.toString())
         .claim("type", "refresh")
+        // JWT claims are second-precision — without a random jti, two refresh tokens
+        // issued for the same user within the same second are byte-identical, which
+        // silently defeats rotation (the "new" token collides with the one just
+        // revoked). id() guarantees uniqueness regardless of timing.
+        .id(UUID.randomUUID().toString())
         .issuedAt(Date.from(now))
         .expiration(
             Date.from(now.plus(Duration.ofDays(appProperties.getJwt().getRefreshTtlDays()))))

@@ -47,6 +47,12 @@ docker compose up -d --build
 
 Todo usuário tem um `role` (`USER` | `ADMIN`, default `USER`), carregado como claim assinada no JWT (`JwtService.generateAccessToken`) e transformado em `GrantedAuthority` `ROLE_*` pelo `JwtAuthFilter` — nunca confia num `role` vindo do body da requisição. `GET /admin/users` é a referência pra proteger uma rota: `@PreAuthorize("hasRole('ADMIN')")` (precisa de `@EnableMethodSecurity` no `SecurityConfig`, já adicionado). Sem jeito de virar admin sozinho — muda a coluna direto no banco (`UPDATE users SET role = 'ADMIN' WHERE email = '...'`) pra testar localmente.
 
+## Sessões
+
+`login`/`refresh` retornam `{ accessToken, refreshToken }` — os dois são JWTs (`JwtService`), mas o refresh token também tem um hash SHA-256 dele mesmo persistido na tabela `refresh_tokens` pra poder ser revogado de verdade (um JWT stateless puro não dá pra "des-emitir" antes de expirar). Validação de access token em toda outra requisição continua totalmente stateless — a consulta no banco só acontece nos caminhos `/auth/refresh` e `/auth/logout`.
+
+`refresh` **rotaciona**: a linha antiga é apagada no momento que um novo par é emitido, então um refresh token roubado e reusado para de funcionar assim que o cliente legítimo fizer o próximo refresh. `logout` revoga um refresh token de vez (idempotente — um token ausente/já revogado ainda retorna 200). Repara que o JWT de refresh carrega uma claim `jti` aleatória — sem ela, dois tokens emitidos pro mesmo usuário dentro do mesmo segundo seriam idênticos byte a byte (claims de JWT tem precisão de segundo), o que derrubaria a rotação silenciosamente.
+
 ## Documentação da API
 
 Docs OpenAPI gerados a partir das anotações de Bean Validation e das anotações `@Tag`/`@Operation`/`@SecurityRequirement` do [springdoc-openapi](https://springdoc.org/) nos controllers. Com o app rodando, abre `http://localhost:8081/swagger-ui/index.html` pro Swagger UI interativo (spec bruto em `/v3/api-docs`). Usa o botão "Authorize" com um JWT de `/auth/login` pra testar as rotas protegidas (`account`, `api/notes`).
