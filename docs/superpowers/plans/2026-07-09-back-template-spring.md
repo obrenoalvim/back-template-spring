@@ -228,7 +228,7 @@ back-template-spring/
       <plugin>
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-maven-plugin</artifactId>
-        <version>10.20.1</version>
+        <version>11.7.2</version>
         <configuration>
           <url>jdbc:postgresql://localhost:${DB_HOST_PORT:5457}/backtemplate</url>
           <user>${env.DB_USER:-postgres}</user>
@@ -472,7 +472,7 @@ Replace the `flyway-maven-plugin` block in `pom.xml` with real profile-activated
 <plugin>
   <groupId>org.flywaydb</groupId>
   <artifactId>flyway-maven-plugin</artifactId>
-  <version>10.20.1</version>
+  <version>11.7.2</version>
   <configuration>
     <url>jdbc:postgresql://localhost:${db.host.port}/${db.name}</url>
     <user>${db.user}</user>
@@ -495,8 +495,8 @@ And add matching default properties to `pom.xml`'s `<properties>` block (overrid
 
 - [ ] **Step 3: Run the migration against the compose db**
 
-Run: `./mvnw -q flyway:migrate`
-Expected: `BUILD SUCCESS`, Flyway log shows `Successfully applied 1 migration to schema "public"`.
+Run: `./mvnw -q process-resources flyway:migrate` (not just `flyway:migrate` — the plugin reads migrations off the compiled classpath via `classpath:db/migration`, so resources must be copied to `target/classes` first; skipping `process-resources` silently logs "No migrations found" instead of failing). Also note the plugin version must track the Spring Boot parent's managed `flyway-core` version exactly (both `11.7.2` here) — a mismatched plugin version (e.g. `10.20.1` against Boot 3.5.0's `11.7.2`-managed `flyway-core`) throws `IncompatibleClassChangeError` at runtime.
+Expected: `BUILD SUCCESS`, log shows the migration applied (or "up to date" on reruns).
 
 - [ ] **Step 4: Verify the table exists**
 
@@ -2978,7 +2978,7 @@ test-e2e:
 	./mvnw -q test -Dtest='*IntegrationTest'
 
 db-migrate:
-	./mvnw -q flyway:migrate
+	./mvnw -q process-resources flyway:migrate
 
 db-generate:
 	@read -p "Migration name (snake_case, no prefix): " name; \
