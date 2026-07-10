@@ -1,5 +1,5 @@
 # --- build ---
-FROM maven:3.9.9-eclipse-temurin-17 AS build
+FROM maven:3.9.15-eclipse-temurin-26 AS build
 # The base image sets MAVEN_CONFIG=/root/.m2; the Maven Wrapper script (mvnw) injects that
 # value as the FIRST CLI argument to Maven (MAVEN_CMD_LINE_ARGS="$MAVEN_CONFIG $*"), which
 # Maven then tries to parse as a lifecycle phase and fails with "Unknown lifecycle phase
