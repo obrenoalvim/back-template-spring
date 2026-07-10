@@ -6,7 +6,7 @@ Backend template using Java/Spring Boot, sibling to `back-template-laravel` and 
 
 ## Stack
 
-- Java 21 (LTS), Spring Boot 3.5.x, Maven (`mvnw` wrapper committed).
+- Java 17 (LTS — matches the JDK available in this environment; Spring Boot 3.5 supports 17-24, no functional loss vs 21), Spring Boot 3.5.x, Maven (`mvnw` wrapper committed).
 - Postgres, Spring Data JPA (Hibernate) for persistence, Flyway for versioned migrations (hand-written SQL under `src/main/resources/db/migration`, `hibernate.ddl-auto=validate` only — Hibernate never mutates schema).
 - Spring Security + JWT (`io.jsonwebtoken:jjwt`), stateless, mirrors `back-template-nest`'s passport-jwt shape (access token + refresh token).
 - Bucket4j (in-memory) for rate limiting on `/auth/login` and `/auth/register`, keyed by client IP.
@@ -18,7 +18,7 @@ Backend template using Java/Spring Boot, sibling to `back-template-laravel` and 
 ## Package layout (feature-based, mirrors Nest template)
 
 ```
-com.example.notetemplate
+com.example.backtemplate
 ├── account/      # change password, delete account
 ├── auth/         # register, login, verify-email, reset-password, JWT issuing/parsing
 ├── notes/        # reference CRUD (controller, service, repository, entity, DTOs)
