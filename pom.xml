@@ -19,7 +19,7 @@
 
   <properties>
     <java.version>17</java.version>
-    <db.host.port>5457</db.host.port>
+    <db.host.port>5458</db.host.port>
     <db.name>backtemplate</db.name>
     <db.user>postgres</db.user>
     <db.password>postgres</db.password>
