@@ -42,6 +42,10 @@ docker compose up -d --build
 - `GET/POST/PUT/DELETE /api/notes[/{id}]` (exige Bearer token) — CRUD de referência
 - `GET /actuator/health`
 
+## Documentação da API
+
+Docs OpenAPI gerados a partir das anotações de Bean Validation e das anotações `@Tag`/`@Operation`/`@SecurityRequirement` do [springdoc-openapi](https://springdoc.org/) nos controllers. Com o app rodando, abre `http://localhost:8081/swagger-ui/index.html` pro Swagger UI interativo (spec bruto em `/v3/api-docs`). Usa o botão "Authorize" com um JWT de `/auth/login` pra testar as rotas protegidas (`account`, `api/notes`).
+
 ## Pre-commit hook
 
 ```bash
