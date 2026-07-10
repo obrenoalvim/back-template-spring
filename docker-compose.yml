@@ -22,11 +22,22 @@ services:
     env_file: .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-backtemplate}
+      # .env's PORT is the HOST-side port for the mapping below; override it here so it
+      # doesn't leak into the container (env_file injects it too) and make Spring bind to
+      # the host port instead of the container's actual port 8080 -- which then desyncs
+      # from EXPOSE 8080 and the Dockerfile HEALTHCHECK, leaving it stuck "starting" forever.
+      PORT: 8080
     ports:
       - "${PORT:-8081}:8080"
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
 
 volumes:
   db-data:
