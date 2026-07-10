@@ -40,7 +40,12 @@ docker compose up -d --build
 - `POST /auth/forgot-password`, `POST /auth/reset-password`
 - `PATCH /account/password`, `DELETE /account` (Bearer auth required)
 - `GET/POST/PUT/DELETE /api/notes[/{id}]` (Bearer auth required) — reference CRUD
+- `GET /admin/users` (admin only) — reference for protecting an admin-only route
 - `GET /actuator/health`
+
+## Roles
+
+Every user has a `role` (`USER` | `ADMIN`, default `USER`), carried as a signed claim in the JWT (`JwtService.generateAccessToken`) and turned into a `ROLE_*` `GrantedAuthority` by `JwtAuthFilter` — never trust a `role` from a request body. `GET /admin/users` is the reference for protecting a route: `@PreAuthorize("hasRole('ADMIN')")` (needs `@EnableMethodSecurity` on `SecurityConfig`, already added). No self-serve way to become admin — flip the column directly (`UPDATE users SET role = 'ADMIN' WHERE email = '...'`) for local testing.
 
 ## API documentation
 

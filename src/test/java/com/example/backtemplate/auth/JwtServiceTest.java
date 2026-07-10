@@ -24,17 +24,18 @@ class JwtServiceTest {
   @Test
   void generatesAndParsesAccessToken() {
     UUID userId = UUID.randomUUID();
-    String token = jwtService.generateAccessToken(userId, "user@example.com");
+    String token = jwtService.generateAccessToken(userId, "user@example.com", "USER");
 
     var claims = jwtService.parse(token).getPayload();
 
     assertThat(claims.getSubject()).isEqualTo(userId.toString());
     assertThat(claims.get("email", String.class)).isEqualTo("user@example.com");
+    assertThat(claims.get("role", String.class)).isEqualTo("USER");
   }
 
   @Test
   void rejectsTamperedToken() {
-    String token = jwtService.generateAccessToken(UUID.randomUUID(), "user@example.com");
+    String token = jwtService.generateAccessToken(UUID.randomUUID(), "user@example.com", "USER");
     // Flip a character in the middle of the payload segment, not the last character of the
     // whole token: base64url's final character can carry unused padding bits, so swapping it
     // sometimes decodes to the exact same bytes and the "tampered" token verifies anyway.

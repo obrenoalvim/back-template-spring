@@ -72,7 +72,7 @@ public class AuthService {
     }
 
     return new TokenResponse(
-        jwtService.generateAccessToken(user.getId(), user.getEmail()),
+        jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name()),
         jwtService.generateRefreshToken(user.getId()));
   }
 
@@ -88,7 +88,7 @@ public class AuthService {
             .orElseThrow(() -> ApiException.unauthorized("Invalid refresh token"));
 
     return new TokenResponse(
-        jwtService.generateAccessToken(user.getId(), user.getEmail()),
+        jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole().name()),
         jwtService.generateRefreshToken(user.getId()));
   }
 
