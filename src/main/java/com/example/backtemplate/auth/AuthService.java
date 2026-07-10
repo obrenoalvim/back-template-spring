@@ -1,8 +1,10 @@
 package com.example.backtemplate.auth;
 
+import com.example.backtemplate.auth.dto.ForgotPasswordRequest;
 import com.example.backtemplate.auth.dto.LoginRequest;
 import com.example.backtemplate.auth.dto.RefreshRequest;
 import com.example.backtemplate.auth.dto.RegisterRequest;
+import com.example.backtemplate.auth.dto.ResetPasswordRequest;
 import com.example.backtemplate.auth.dto.TokenResponse;
 import com.example.backtemplate.common.ApiException;
 import com.example.backtemplate.email.EmailService;
@@ -90,5 +92,37 @@ public class AuthService {
         return new TokenResponse(
                 jwtService.generateAccessToken(user.getId(), user.getEmail()),
                 jwtService.generateRefreshToken(user.getId()));
+    }
+
+    public void forgotPassword(ForgotPasswordRequest req) {
+        userRepository
+                .findByEmail(req.email())
+                .ifPresent(
+                        user -> {
+                            user.setResetToken(UUID.randomUUID().toString());
+                            user.setResetTokenExpiresAt(Instant.now().plusSeconds(3600));
+                            userRepository.save(user);
+                            emailService.send(
+                                    user.getEmail(),
+                                    "Reset your password",
+                                    "Reset token: " + user.getResetToken());
+                        });
+        // always returns normally, whether or not the email exists -- avoids user enumeration
+    }
+
+    public void resetPassword(ResetPasswordRequest req) {
+        User user =
+                userRepository
+                        .findByResetToken(req.token())
+                        .orElseThrow(() -> ApiException.notFound("Invalid reset token"));
+
+        if (user.getResetTokenExpiresAt().isBefore(Instant.now())) {
+            throw ApiException.conflict("Reset token expired");
+        }
+
+        user.setPasswordHash(passwordService.hash(req.newPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiresAt(null);
+        userRepository.save(user);
     }
 }

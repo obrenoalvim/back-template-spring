@@ -1,8 +1,10 @@
 package com.example.backtemplate.auth;
 
+import com.example.backtemplate.auth.dto.ForgotPasswordRequest;
 import com.example.backtemplate.auth.dto.LoginRequest;
 import com.example.backtemplate.auth.dto.RefreshRequest;
 import com.example.backtemplate.auth.dto.RegisterRequest;
+import com.example.backtemplate.auth.dto.ResetPasswordRequest;
 import com.example.backtemplate.auth.dto.TokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +37,15 @@ public class AuthController {
     @PostMapping("/refresh")
     public TokenResponse refresh(@Valid @RequestBody RefreshRequest req) {
         return authService.refresh(req);
+    }
+
+    @PostMapping("/forgot-password")
+    public void forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
+        authService.forgotPassword(req);
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        authService.resetPassword(req);
     }
 }
