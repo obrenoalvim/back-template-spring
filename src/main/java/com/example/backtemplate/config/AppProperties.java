@@ -12,50 +12,47 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class AppProperties {
 
-    @Valid
-    @NotNull
-    @NestedConfigurationProperty
-    private Jwt jwt;
+  @Valid @NotNull @NestedConfigurationProperty private Jwt jwt;
 
-    public Jwt getJwt() {
-        return jwt;
+  public Jwt getJwt() {
+    return jwt;
+  }
+
+  public void setJwt(Jwt jwt) {
+    this.jwt = jwt;
+  }
+
+  public static class Jwt {
+
+    @NotBlank
+    @Size(min = 32, message = "app.jwt.secret must be at least 32 characters")
+    private String secret;
+
+    private int accessTtlMinutes = 15;
+    private int refreshTtlDays = 30;
+
+    public String getSecret() {
+      return secret;
     }
 
-    public void setJwt(Jwt jwt) {
-        this.jwt = jwt;
+    public void setSecret(String secret) {
+      this.secret = secret;
     }
 
-    public static class Jwt {
-
-        @NotBlank
-        @Size(min = 32, message = "app.jwt.secret must be at least 32 characters")
-        private String secret;
-
-        private int accessTtlMinutes = 15;
-        private int refreshTtlDays = 30;
-
-        public String getSecret() {
-            return secret;
-        }
-
-        public void setSecret(String secret) {
-            this.secret = secret;
-        }
-
-        public int getAccessTtlMinutes() {
-            return accessTtlMinutes;
-        }
-
-        public void setAccessTtlMinutes(int accessTtlMinutes) {
-            this.accessTtlMinutes = accessTtlMinutes;
-        }
-
-        public int getRefreshTtlDays() {
-            return refreshTtlDays;
-        }
-
-        public void setRefreshTtlDays(int refreshTtlDays) {
-            this.refreshTtlDays = refreshTtlDays;
-        }
+    public int getAccessTtlMinutes() {
+      return accessTtlMinutes;
     }
+
+    public void setAccessTtlMinutes(int accessTtlMinutes) {
+      this.accessTtlMinutes = accessTtlMinutes;
+    }
+
+    public int getRefreshTtlDays() {
+      return refreshTtlDays;
+    }
+
+    public void setRefreshTtlDays(int refreshTtlDays) {
+      this.refreshTtlDays = refreshTtlDays;
+    }
+  }
 }

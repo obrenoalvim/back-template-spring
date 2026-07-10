@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 @Conditional(MailHostUnsetCondition.class)
 public class ConsoleEmailService implements EmailService {
 
-    @Override
-    public void send(String to, String subject, String body) {
-        log.info("[dev email fallback] to={} subject={}\n{}", to, subject, body);
-    }
+  @Override
+  public void send(String to, String subject, String body) {
+    log.info("[dev email fallback] to={} subject={}\n{}", to, subject, body);
+  }
 }

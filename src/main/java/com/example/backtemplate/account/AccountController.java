@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AccountController {
 
-    private final AccountService accountService;
+  private final AccountService accountService;
 
-    @PatchMapping("/password")
-    public void changePassword(
-            @AuthenticationPrincipal String userIdStr, @Valid @RequestBody ChangePasswordRequest req) {
-        accountService.changePassword(UUID.fromString(userIdStr), req);
-    }
+  @PatchMapping("/password")
+  public void changePassword(
+      @AuthenticationPrincipal String userIdStr, @Valid @RequestBody ChangePasswordRequest req) {
+    accountService.changePassword(UUID.fromString(userIdStr), req);
+  }
 
-    @DeleteMapping
-    public void deleteAccount(@AuthenticationPrincipal String userIdStr) {
-        accountService.deleteAccount(UUID.fromString(userIdStr));
-    }
+  @DeleteMapping
+  public void deleteAccount(@AuthenticationPrincipal String userIdStr) {
+    accountService.deleteAccount(UUID.fromString(userIdStr));
+  }
 }

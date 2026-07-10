@@ -1769,7 +1769,12 @@ class JwtServiceTest {
     @Test
     void rejectsTamperedToken() {
         String token = jwtService.generateAccessToken(UUID.randomUUID(), "user@example.com");
-        String tampered = token.substring(0, token.length() - 1) + "x";
+        // Flip a character in the middle, not the last character of the whole token: base64url's
+        // final character can carry unused padding bits, so swapping it sometimes decodes to the
+        // exact same bytes and the "tampered" token verifies anyway (this bit us in practice).
+        int mid = token.length() / 2;
+        char flipped = token.charAt(mid) == 'a' ? 'b' : 'a';
+        String tampered = token.substring(0, mid) + flipped + token.substring(mid + 1);
 
         assertThatThrownBy(() -> jwtService.parse(tampered))
                 .isInstanceOf(io.jsonwebtoken.JwtException.class);

@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration;
 
 class AppPropertiesValidationTest {
 
-    @EnableConfigurationProperties(AppProperties.class)
-    @Configuration
-    static class TestConfig {}
+  @EnableConfigurationProperties(AppProperties.class)
+  @Configuration
+  static class TestConfig {}
 
-    @Test
-    void contextFailsToStartWithoutJwtSecret() {
-        var context = new AnnotationConfigApplicationContext();
-        TestPropertyValues.of("app.jwt.secret=").applyTo(context);
-        context.register(TestConfig.class);
+  @Test
+  void contextFailsToStartWithoutJwtSecret() {
+    var context = new AnnotationConfigApplicationContext();
+    TestPropertyValues.of("app.jwt.secret=").applyTo(context);
+    context.register(TestConfig.class);
 
-        assertThatThrownBy(context::refresh).hasStackTraceContaining("must not be blank");
+    assertThatThrownBy(context::refresh).hasStackTraceContaining("must not be blank");
 
-        context.close();
-    }
+    context.close();
+  }
 }

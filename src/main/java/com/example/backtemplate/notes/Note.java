@@ -16,12 +16,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Note extends BaseEntity {
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false)
+  private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String content;
 
-    @Column(name = "owner_id", nullable = false)
-    private UUID ownerId;
+  @Column(name = "owner_id", nullable = false)
+  private UUID ownerId;
 }

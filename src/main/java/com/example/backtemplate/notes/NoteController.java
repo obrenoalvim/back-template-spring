@@ -15,35 +15,36 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class NoteController {
 
-    private final NoteService noteService;
+  private final NoteService noteService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public NoteResponse create(@AuthenticationPrincipal String ownerIdStr, @Valid @RequestBody NoteRequest req) {
-        return noteService.create(UUID.fromString(ownerIdStr), req);
-    }
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public NoteResponse create(
+      @AuthenticationPrincipal String ownerIdStr, @Valid @RequestBody NoteRequest req) {
+    return noteService.create(UUID.fromString(ownerIdStr), req);
+  }
 
-    @GetMapping
-    public List<NoteResponse> list(@AuthenticationPrincipal String ownerIdStr) {
-        return noteService.list(UUID.fromString(ownerIdStr));
-    }
+  @GetMapping
+  public List<NoteResponse> list(@AuthenticationPrincipal String ownerIdStr) {
+    return noteService.list(UUID.fromString(ownerIdStr));
+  }
 
-    @GetMapping("/{id}")
-    public NoteResponse get(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
-        return noteService.get(UUID.fromString(ownerIdStr), id);
-    }
+  @GetMapping("/{id}")
+  public NoteResponse get(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
+    return noteService.get(UUID.fromString(ownerIdStr), id);
+  }
 
-    @PutMapping("/{id}")
-    public NoteResponse update(
-            @AuthenticationPrincipal String ownerIdStr,
-            @PathVariable UUID id,
-            @Valid @RequestBody NoteRequest req) {
-        return noteService.update(UUID.fromString(ownerIdStr), id, req);
-    }
+  @PutMapping("/{id}")
+  public NoteResponse update(
+      @AuthenticationPrincipal String ownerIdStr,
+      @PathVariable UUID id,
+      @Valid @RequestBody NoteRequest req) {
+    return noteService.update(UUID.fromString(ownerIdStr), id, req);
+  }
 
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
-        noteService.delete(UUID.fromString(ownerIdStr), id);
-    }
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void delete(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
+    noteService.delete(UUID.fromString(ownerIdStr), id);
+  }
 }

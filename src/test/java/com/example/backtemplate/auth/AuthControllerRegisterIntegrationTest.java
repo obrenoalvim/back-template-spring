@@ -12,32 +12,32 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 class AuthControllerRegisterIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private TestRestTemplate restTemplate;
-    @Autowired private JdbcTemplate jdbcTemplate;
+  @Autowired private TestRestTemplate restTemplate;
+  @Autowired private JdbcTemplate jdbcTemplate;
 
-    @Test
-    void registerCreatesUnverifiedUserAndVerifyActivatesIt() {
-        var body = Map.of("email", "new@example.com", "password", "s3cret-pw");
+  @Test
+  void registerCreatesUnverifiedUserAndVerifyActivatesIt() {
+    var body = Map.of("email", "new@example.com", "password", "s3cret-pw");
 
-        var registerResp = restTemplate.postForEntity("/auth/register", body, Void.class);
-        assertThat(registerResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    var registerResp = restTemplate.postForEntity("/auth/register", body, Void.class);
+    assertThat(registerResp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
-        Boolean verified =
-                jdbcTemplate.queryForObject(
-                        "SELECT email_verified FROM users WHERE email = ?", Boolean.class, "new@example.com");
-        assertThat(verified).isFalse();
+    Boolean verified =
+        jdbcTemplate.queryForObject(
+            "SELECT email_verified FROM users WHERE email = ?", Boolean.class, "new@example.com");
+    assertThat(verified).isFalse();
 
-        String token =
-                jdbcTemplate.queryForObject(
-                        "SELECT verification_token FROM users WHERE email = ?",
-                        String.class,
-                        "new@example.com");
+    String token =
+        jdbcTemplate.queryForObject(
+            "SELECT verification_token FROM users WHERE email = ?",
+            String.class,
+            "new@example.com");
 
-        restTemplate.getForEntity("/auth/verify-email?token=" + token, Void.class);
+    restTemplate.getForEntity("/auth/verify-email?token=" + token, Void.class);
 
-        verified =
-                jdbcTemplate.queryForObject(
-                        "SELECT email_verified FROM users WHERE email = ?", Boolean.class, "new@example.com");
-        assertThat(verified).isTrue();
-    }
+    verified =
+        jdbcTemplate.queryForObject(
+            "SELECT email_verified FROM users WHERE email = ?", Boolean.class, "new@example.com");
+    assertThat(verified).isTrue();
+  }
 }

@@ -10,17 +10,17 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 
 class RateLimitFilterIntegrationTest extends AbstractIntegrationTest {
 
-    @Autowired private TestRestTemplate restTemplate;
+  @Autowired private TestRestTemplate restTemplate;
 
-    @Test
-    void sixthLoginAttemptWithinAMinuteIsRateLimited() {
-        var body = Map.of("email", "ratelimit@example.com", "password", "wrong-pw");
+  @Test
+  void sixthLoginAttemptWithinAMinuteIsRateLimited() {
+    var body = Map.of("email", "ratelimit@example.com", "password", "wrong-pw");
 
-        for (int i = 0; i < 5; i++) {
-            restTemplate.postForEntity("/auth/login", body, Void.class);
-        }
-        var sixth = restTemplate.postForEntity("/auth/login", body, Void.class);
-
-        assertThat(sixth.getStatusCode().value()).isEqualTo(429);
+    for (int i = 0; i < 5; i++) {
+      restTemplate.postForEntity("/auth/login", body, Void.class);
     }
+    var sixth = restTemplate.postForEntity("/auth/login", body, Void.class);
+
+    assertThat(sixth.getStatusCode().value()).isEqualTo(429);
+  }
 }

@@ -7,9 +7,9 @@ import org.springframework.util.StringUtils;
 
 public class MailHostSetCondition implements Condition {
 
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-        String host = context.getEnvironment().getProperty("app.mail.host");
-        return StringUtils.hasText(host);
-    }
+  @Override
+  public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    String host = context.getEnvironment().getProperty("app.mail.host");
+    return StringUtils.hasText(host);
+  }
 }

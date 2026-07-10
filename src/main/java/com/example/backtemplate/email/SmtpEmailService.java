@@ -12,18 +12,18 @@ import org.springframework.stereotype.Service;
 @Conditional(MailHostSetCondition.class)
 public class SmtpEmailService implements EmailService {
 
-    private final JavaMailSender mailSender;
+  private final JavaMailSender mailSender;
 
-    @Value("${app.mail.from}")
-    private String from;
+  @Value("${app.mail.from}")
+  private String from;
 
-    @Override
-    public void send(String to, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(from);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
-    }
+  @Override
+  public void send(String to, String subject, String body) {
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom(from);
+    message.setTo(to);
+    message.setSubject(subject);
+    message.setText(body);
+    mailSender.send(message);
+  }
 }

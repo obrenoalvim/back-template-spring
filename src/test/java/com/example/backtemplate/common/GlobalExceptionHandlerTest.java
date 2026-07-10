@@ -8,16 +8,16 @@ import org.springframework.http.ResponseEntity;
 
 class GlobalExceptionHandlerTest {
 
-    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
+  private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-    @Test
-    void mapsApiExceptionToErrorShape() {
-        ApiException ex = ApiException.notFound("Note not found");
+  @Test
+  void mapsApiExceptionToErrorShape() {
+    ApiException ex = ApiException.notFound("Note not found");
 
-        ResponseEntity<ErrorResponse> response = handler.handleApiException(ex);
+    ResponseEntity<ErrorResponse> response = handler.handleApiException(ex);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(response.getBody().error().code()).isEqualTo("NOT_FOUND");
-        assertThat(response.getBody().error().message()).isEqualTo("Note not found");
-    }
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    assertThat(response.getBody().error().code()).isEqualTo("NOT_FOUND");
+    assertThat(response.getBody().error().message()).isEqualTo("Note not found");
+  }
 }

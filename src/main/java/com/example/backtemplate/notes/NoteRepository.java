@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface NoteRepository extends JpaRepository<Note, UUID> {
-    List<Note> findAllByOwnerId(UUID ownerId);
+  List<Note> findAllByOwnerId(UUID ownerId);
 
-    Optional<Note> findByIdAndOwnerId(UUID id, UUID ownerId);
+  Optional<Note> findByIdAndOwnerId(UUID id, UUID ownerId);
 }
