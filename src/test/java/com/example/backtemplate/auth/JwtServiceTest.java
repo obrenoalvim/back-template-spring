@@ -12,9 +12,11 @@ class JwtServiceTest {
     private final AppProperties props = new AppProperties();
 
     {
-        props.setJwtSecret("a".repeat(32));
-        props.setJwtAccessTtlMinutes(15);
-        props.setJwtRefreshTtlDays(30);
+        var jwt = new AppProperties.Jwt();
+        jwt.setSecret("a".repeat(32));
+        jwt.setAccessTtlMinutes(15);
+        jwt.setRefreshTtlDays(30);
+        props.setJwt(jwt);
     }
 
     private final JwtService jwtService = new JwtService(props);

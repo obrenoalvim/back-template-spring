@@ -1883,16 +1883,60 @@ public interface EmailService {
 
 `src/main/java/com/example/backtemplate/email/ConsoleEmailService.java`:
 
+`ConditionalOnProperty` cannot cleanly express "empty vs non-empty" — without an explicit `havingValue`, Spring treats a property bound to an empty string as still "present" (not missing), so `@ConditionalOnProperty(name = "host")` on `SmtpEmailService` matches even when `app.mail.host` resolves to `""` via `${MAIL_HOST:}`. Both beans end up active simultaneously and `AuthService`'s single-`EmailService` constructor injection fails at boot with "expected single matching bean but found 2". Use two small `Condition` classes instead, keyed on `StringUtils.hasText`:
+
+`src/main/java/com/example/backtemplate/email/MailHostUnsetCondition.java`:
+
+```java
+package com.example.backtemplate.email;
+
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.StringUtils;
+
+public class MailHostUnsetCondition implements Condition {
+
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String host = context.getEnvironment().getProperty("app.mail.host");
+        return !StringUtils.hasText(host);
+    }
+}
+```
+
+`src/main/java/com/example/backtemplate/email/MailHostSetCondition.java`:
+
+```java
+package com.example.backtemplate.email;
+
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.util.StringUtils;
+
+public class MailHostSetCondition implements Condition {
+
+    @Override
+    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        String host = context.getEnvironment().getProperty("app.mail.host");
+        return StringUtils.hasText(host);
+    }
+}
+```
+
+`src/main/java/com/example/backtemplate/email/ConsoleEmailService.java`:
+
 ```java
 package com.example.backtemplate.email;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(prefix = "app.mail", name = "host", havingValue = "", matchIfMissing = true)
+@Conditional(MailHostUnsetCondition.class)
 public class ConsoleEmailService implements EmailService {
 
     @Override
@@ -1909,14 +1953,14 @@ package com.example.backtemplate.email;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperty(prefix = "app.mail", name = "host")
+@Conditional(MailHostSetCondition.class)
 public class SmtpEmailService implements EmailService {
 
     private final JavaMailSender mailSender;
@@ -1936,18 +1980,20 @@ public class SmtpEmailService implements EmailService {
 }
 ```
 
-Add to `application.yml`:
+Add to `application.yml` — merge `mail:` into the *existing* `spring:` block (YAML has no duplicate-key merging; a second top-level `spring:` block silently wipes out `spring.application`/`spring.profiles` set in Task 1):
 ```yaml
-app:
-  mail:
-    host: ${MAIL_HOST:}
-    from: ${MAIL_FROM:no-reply@example.com}
 spring:
+  # ...existing application/profiles keys stay here...
   mail:
     host: ${MAIL_HOST:}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
+
+app:
+  mail:
+    host: ${MAIL_HOST:}
+    from: ${MAIL_FROM:no-reply@example.com}
 ```
 
 `ConditionalOnProperty(havingValue = "", matchIfMissing = true)` on `ConsoleEmailService` and `ConditionalOnProperty(name = "host")` (any non-blank value) on `SmtpEmailService` are mutually exclusive given the same `app.mail.host` property — exactly one bean of type `EmailService` exists at a time, so `AuthService`'s `@RequiredArgsConstructor` injection never sees an ambiguity error.

@@ -1,46 +1,61 @@
 package com.example.backtemplate.config;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
-@Configuration
-@EnableConfigurationProperties(AppProperties.class)
 @ConfigurationProperties(prefix = "app")
 @Validated
 public class AppProperties {
 
-    @NotBlank
-    @Size(min = 32, message = "app.jwt.secret must be at least 32 characters")
-    private String jwtSecret;
+    @Valid
+    @NotNull
+    @NestedConfigurationProperty
+    private Jwt jwt;
 
-    private int jwtAccessTtlMinutes = 15;
-    private int jwtRefreshTtlDays = 30;
-
-    public String getJwtSecret() {
-        return jwtSecret;
+    public Jwt getJwt() {
+        return jwt;
     }
 
-    public void setJwtSecret(String jwtSecret) {
-        this.jwtSecret = jwtSecret;
+    public void setJwt(Jwt jwt) {
+        this.jwt = jwt;
     }
 
-    public int getJwtAccessTtlMinutes() {
-        return jwtAccessTtlMinutes;
-    }
+    public static class Jwt {
 
-    public void setJwtAccessTtlMinutes(int jwtAccessTtlMinutes) {
-        this.jwtAccessTtlMinutes = jwtAccessTtlMinutes;
-    }
+        @NotBlank
+        @Size(min = 32, message = "app.jwt.secret must be at least 32 characters")
+        private String secret;
 
-    public int getJwtRefreshTtlDays() {
-        return jwtRefreshTtlDays;
-    }
+        private int accessTtlMinutes = 15;
+        private int refreshTtlDays = 30;
 
-    public void setJwtRefreshTtlDays(int jwtRefreshTtlDays) {
-        this.jwtRefreshTtlDays = jwtRefreshTtlDays;
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public int getAccessTtlMinutes() {
+            return accessTtlMinutes;
+        }
+
+        public void setAccessTtlMinutes(int accessTtlMinutes) {
+            this.accessTtlMinutes = accessTtlMinutes;
+        }
+
+        public int getRefreshTtlDays() {
+            return refreshTtlDays;
+        }
+
+        public void setRefreshTtlDays(int refreshTtlDays) {
+            this.refreshTtlDays = refreshTtlDays;
+        }
     }
 }

@@ -20,7 +20,7 @@ public class JwtService {
     private final AppProperties appProperties;
 
     private Key signingKey() {
-        return Keys.hmacShaKeyFor(appProperties.getJwtSecret().getBytes());
+        return Keys.hmacShaKeyFor(appProperties.getJwt().getSecret().getBytes());
     }
 
     public String generateAccessToken(UUID userId, String email) {
@@ -30,7 +30,7 @@ public class JwtService {
                 .claim("email", email)
                 .claim("type", "access")
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(Duration.ofMinutes(appProperties.getJwtAccessTtlMinutes()))))
+                .expiration(Date.from(now.plus(Duration.ofMinutes(appProperties.getJwt().getAccessTtlMinutes()))))
                 .signWith(signingKey())
                 .compact();
     }
@@ -41,7 +41,7 @@ public class JwtService {
                 .subject(userId.toString())
                 .claim("type", "refresh")
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(Duration.ofDays(appProperties.getJwtRefreshTtlDays()))))
+                .expiration(Date.from(now.plus(Duration.ofDays(appProperties.getJwt().getRefreshTtlDays()))))
                 .signWith(signingKey())
                 .compact();
     }
