@@ -1459,7 +1459,9 @@ class AppPropertiesValidationTest {
         context.register(AppProperties.class);
 
         assertThatThrownBy(context::refresh)
-                .hasMessageContaining("app.jwt.secret");
+                .hasStackTraceContaining("jwtSecret"); // Spring wraps the NotBlank message deep in
+                // the cause chain; AssertJ's hasMessageContaining only checks the top-level
+                // exception, so assert against the full stack trace instead.
 
         context.close();
     }
