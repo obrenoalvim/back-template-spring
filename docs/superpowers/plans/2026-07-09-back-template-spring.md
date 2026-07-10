@@ -519,7 +519,7 @@ git commit -m "feat: add users table migration and fix Flyway plugin config"
 - Create: `src/main/java/com/example/backtemplate/common/BaseEntity.java`
 - Create: `src/main/java/com/example/backtemplate/notes/Note.java`
 - Create: `src/main/java/com/example/backtemplate/notes/NoteRepository.java`
-- Test: `src/test/java/com/example/backtemplate/notes/NoteRepositoryTest.java`
+- Test: `src/test/java/com/example/backtemplate/notes/NoteRepositoryIntegrationTest.java`
 - Test: `src/test/java/com/example/backtemplate/AbstractIntegrationTest.java` (shared Testcontainers base, used by every future `@SpringBootTest`)
 
 **Interfaces:**
@@ -670,7 +670,7 @@ public interface NoteRepository extends JpaRepository<Note, UUID> {
 
 - [ ] **Step 6: Write the failing test**
 
-`src/test/java/com/example/backtemplate/notes/NoteRepositoryTest.java`:
+`src/test/java/com/example/backtemplate/notes/NoteRepositoryIntegrationTest.java`:
 
 ```java
 package com.example.backtemplate.notes;
@@ -683,7 +683,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-class NoteRepositoryTest extends AbstractIntegrationTest {
+class NoteRepositoryIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired private NoteRepository noteRepository;
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -713,12 +713,12 @@ class NoteRepositoryTest extends AbstractIntegrationTest {
 
 - [ ] **Step 7: Run it to verify it fails (no table yet in the running app JAR cache)**
 
-Run: `./mvnw -q test -Dtest=NoteRepositoryTest`
+Run: `./mvnw -q test -Dtest=NoteRepositoryIntegrationTest`
 Expected: FAILS or is unrunnable before this task's files exist — since Steps 1-6 already create every needed file, run this only as the real verification pass (see Step 8), not as a pre-implementation check. Skip a separate "fails first" run here: this task creates schema, entity, and repository together, so there is no meaningful intermediate red state.
 
 - [ ] **Step 8: Run it to verify it passes**
 
-Run: `./mvnw -q test -Dtest=NoteRepositoryTest`
+Run: `./mvnw -q test -Dtest=NoteRepositoryIntegrationTest`
 Expected: `BUILD SUCCESS`, 1 test run, 0 failures. (Requires Docker running for Testcontainers.)
 
 - [ ] **Step 9: Commit**

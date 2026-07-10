@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-class NoteRepositoryTest extends AbstractIntegrationTest {
+class NoteRepositoryIntegrationTest extends AbstractIntegrationTest {
 
   @Autowired private NoteRepository noteRepository;
   @Autowired private JdbcTemplate jdbcTemplate;
