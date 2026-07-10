@@ -1,3 +1,5 @@
+English | [Português](README.pt.md)
+
 # back-template-spring
 
 Spring Boot backend template. Java 17, Maven, Postgres + Flyway + Spring Data JPA, JWT auth via Spring Security, reference `Note` CRUD domain. Sibling to `back-template-laravel` and `back-template-nest`.
