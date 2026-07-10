@@ -3,7 +3,7 @@ package com.example.backtemplate.notes;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.backtemplate.AbstractIntegrationTest;
-import java.util.UUID;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -15,18 +15,23 @@ class NoteControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired private TestRestTemplate restTemplate;
     @Autowired private JdbcTemplate jdbcTemplate;
 
+    private String loginAndGetToken(String email, String password) {
+        restTemplate.postForEntity("/auth/register", Map.of("email", email, "password", password), Void.class);
+        jdbcTemplate.update("UPDATE users SET email_verified = true WHERE email = ?", email);
+        var resp =
+                restTemplate.postForEntity(
+                        "/auth/login", Map.of("email", email, "password", password), Map.class);
+        return (String) resp.getBody().get("accessToken");
+    }
+
     @Test
     void fullCrudRoundTrip() {
-        UUID ownerId =
-                jdbcTemplate.queryForObject(
-                        "INSERT INTO users (email) VALUES (?) RETURNING id",
-                        UUID.class,
-                        "crud@example.com");
+        String token = loginAndGetToken("crud@example.com", "s3cret-pw");
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Owner-Id", ownerId.toString());
+        headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        var createBody = java.util.Map.of("title", "Hello", "content", "World");
+        var createBody = Map.of("title", "Hello", "content", "World");
         var createResp =
                 restTemplate.exchange(
                         "/api/notes",
@@ -49,7 +54,7 @@ class NoteControllerIntegrationTest extends AbstractIntegrationTest {
                         java.util.Map.class);
         assertThat(getResp.getBody().get("title")).isEqualTo("Hello");
 
-        var updateBody = java.util.Map.of("title", "Updated", "content", "World");
+        var updateBody = Map.of("title", "Updated", "content", "World");
         restTemplate.exchange(
                 "/api/notes/" + noteId,
                 HttpMethod.PUT,

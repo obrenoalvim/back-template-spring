@@ -1,6 +1,9 @@
 package com.example.backtemplate.auth;
 
+import com.example.backtemplate.auth.dto.LoginRequest;
+import com.example.backtemplate.auth.dto.RefreshRequest;
 import com.example.backtemplate.auth.dto.RegisterRequest;
+import com.example.backtemplate.auth.dto.TokenResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,5 +25,15 @@ public class AuthController {
     @GetMapping("/verify-email")
     public void verifyEmail(@RequestParam String token) {
         authService.verifyEmail(token);
+    }
+
+    @PostMapping("/login")
+    public TokenResponse login(@Valid @RequestBody LoginRequest req) {
+        return authService.login(req);
+    }
+
+    @PostMapping("/refresh")
+    public TokenResponse refresh(@Valid @RequestBody RefreshRequest req) {
+        return authService.refresh(req);
     }
 }

@@ -1,6 +1,9 @@
 package com.example.backtemplate.auth;
 
+import com.example.backtemplate.auth.dto.LoginRequest;
+import com.example.backtemplate.auth.dto.RefreshRequest;
 import com.example.backtemplate.auth.dto.RegisterRequest;
+import com.example.backtemplate.auth.dto.TokenResponse;
 import com.example.backtemplate.common.ApiException;
 import com.example.backtemplate.email.EmailService;
 import java.time.Instant;
@@ -15,6 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordService passwordService;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     public void register(RegisterRequest req) {
         userRepository
@@ -52,5 +56,39 @@ public class AuthService {
         user.setVerificationToken(null);
         user.setVerificationTokenExpiresAt(null);
         userRepository.save(user);
+    }
+
+    public TokenResponse login(LoginRequest req) {
+        User user =
+                userRepository
+                        .findByEmail(req.email())
+                        .orElseThrow(() -> ApiException.unauthorized("Invalid credentials"));
+
+        if (!passwordService.matches(req.password(), user.getPasswordHash())) {
+            throw ApiException.unauthorized("Invalid credentials");
+        }
+        if (!user.isEmailVerified()) {
+            throw ApiException.unauthorized("Email not verified");
+        }
+
+        return new TokenResponse(
+                jwtService.generateAccessToken(user.getId(), user.getEmail()),
+                jwtService.generateRefreshToken(user.getId()));
+    }
+
+    public TokenResponse refresh(RefreshRequest req) {
+        var claims = jwtService.parse(req.refreshToken()).getPayload();
+        if (!"refresh".equals(claims.get("type", String.class))) {
+            throw ApiException.unauthorized("Invalid refresh token");
+        }
+        UUID userId = UUID.fromString(claims.getSubject());
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> ApiException.unauthorized("Invalid refresh token"));
+
+        return new TokenResponse(
+                jwtService.generateAccessToken(user.getId(), user.getEmail()),
+                jwtService.generateRefreshToken(user.getId()));
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,36 +17,33 @@ public class NoteController {
 
     private final NoteService noteService;
 
-    // TEMPORARY: X-Owner-Id header stands in for the authenticated principal
-    // until Task 14 wires JwtAuthFilter + SecurityContext.
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public NoteResponse create(@RequestHeader("X-Owner-Id") UUID ownerId, @Valid @RequestBody NoteRequest req) {
-        return noteService.create(ownerId, req);
+    public NoteResponse create(@AuthenticationPrincipal String ownerIdStr, @Valid @RequestBody NoteRequest req) {
+        return noteService.create(UUID.fromString(ownerIdStr), req);
     }
 
     @GetMapping
-    public List<NoteResponse> list(@RequestHeader("X-Owner-Id") UUID ownerId) {
-        return noteService.list(ownerId);
+    public List<NoteResponse> list(@AuthenticationPrincipal String ownerIdStr) {
+        return noteService.list(UUID.fromString(ownerIdStr));
     }
 
     @GetMapping("/{id}")
-    public NoteResponse get(@RequestHeader("X-Owner-Id") UUID ownerId, @PathVariable UUID id) {
-        return noteService.get(ownerId, id);
+    public NoteResponse get(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
+        return noteService.get(UUID.fromString(ownerIdStr), id);
     }
 
     @PutMapping("/{id}")
     public NoteResponse update(
-            @RequestHeader("X-Owner-Id") UUID ownerId,
+            @AuthenticationPrincipal String ownerIdStr,
             @PathVariable UUID id,
             @Valid @RequestBody NoteRequest req) {
-        return noteService.update(ownerId, id, req);
+        return noteService.update(UUID.fromString(ownerIdStr), id, req);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@RequestHeader("X-Owner-Id") UUID ownerId, @PathVariable UUID id) {
-        noteService.delete(ownerId, id);
+    public void delete(@AuthenticationPrincipal String ownerIdStr, @PathVariable UUID id) {
+        noteService.delete(UUID.fromString(ownerIdStr), id);
     }
 }
