@@ -2,5 +2,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    # Feeds every generated SQL statement to SQLStatementCountValidator so
+    # tests can assert exact query counts (see AdminControllerIntegrationTest).
+    properties:
+      hibernate:
+        session_factory:
+          statement_inspector: io.hypersistence.utils.hibernate.query.SQLStatementCountValidator
   flyway:
     enabled: true

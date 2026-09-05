@@ -9,6 +9,7 @@ Spring Boot backend template: Java 17, Maven, PostgreSQL + Flyway + Spring Data 
 - JWT auth with short-lived access tokens and rotating, revocable refresh tokens (refresh tokens are hashed and persisted so they can actually be revoked, not just left to expire)
 - Email verification and password reset flows, with a console fallback for email in dev so there's nothing to configure to test locally
 - Role-based access control (`USER` / `ADMIN`) enforced with `@PreAuthorize`, plus a reference admin-only route
+- Automated N+1 query guard running as a regular test in CI (see below)
 - Rate limiting on `/auth/login` and `/auth/register` (Bucket4j, in-memory token bucket per IP)
 - Flyway-managed schema with `hibernate.ddl-auto=validate`, so nothing drifts silently
 - OpenAPI docs and Swagger UI generated from controller annotations
@@ -88,6 +89,7 @@ docker compose up -d --build
 - `PATCH /account/password`, `DELETE /account` (Bearer auth required)
 - `GET/POST/PUT/DELETE /api/notes[/{id}]` (Bearer auth required) — reference CRUD
 - `GET /admin/users` (admin only) — reference for protecting an admin-only route
+- `GET /admin/notes` (admin only) — reference for eager-loading a relation without N+1 (see "The N+1 guard" below)
 - `GET /actuator/health`
 
 ## Roles
@@ -99,6 +101,31 @@ Every user has a `role` (`USER` or `ADMIN`, default `USER`), carried as a signed
 `login` and `refresh` return `{ accessToken, refreshToken }`, both JWTs (`JwtService`). The refresh token also gets a SHA-256 hash of itself persisted in the `refresh_tokens` table so it can actually be revoked; a bare stateless JWT can't be un-issued before it expires. Access-token validation on every other request stays fully stateless. The DB lookup only happens on the `/auth/refresh` and `/auth/logout` paths.
 
 `refresh` rotates: the old row is deleted the moment a new pair is issued, so a stolen-and-replayed refresh token stops working right after the legitimate client's next refresh. `logout` revokes a refresh token outright and is idempotent (a missing or already-revoked token still returns 200). The refresh JWT also carries a random `jti` claim. Without one, two tokens minted for the same user in the same second would be byte-identical (JWT claims are second-precision), which would silently defeat rotation.
+
+## The N+1 guard
+
+`Note` has a read-only `owner` association back to `User` (mapped alongside the existing `ownerId` column). `NoteRepository.findAllWithOwner()` loads it with `JOIN FETCH`, so `GET /admin/notes` runs as a single SQL query no matter how many notes exist, instead of one extra query per note.
+
+`AdminControllerIntegrationTest#notes_endpoint_runs_a_constant_number_of_queries_regardless_of_note_count` seeds several notes, resets [hypersistence-utils](https://github.com/vladmihalcea/hypersistence-utils)' `SQLStatementCountValidator`, calls the endpoint, and asserts exactly one `SELECT` ran. If someone later replaces `JOIN FETCH` with a loop that reads `note.getOwner()` per row (or removes the association's `JOIN FETCH` some other way), this test goes red in CI before it becomes a production performance problem.
+
+`SQLStatementCountValidator` only counts anything because `application-test.yml` wires it in as Hibernate's `statement_inspector`:
+
+```yaml
+spring:
+  jpa:
+    properties:
+      hibernate:
+        session_factory:
+          statement_inspector: io.hypersistence.utils.hibernate.query.SQLStatementCountValidator
+```
+
+To use the same pattern elsewhere in this project:
+
+```java
+SQLStatementCountValidator.reset();
+var result = someRepository.methodThatShouldRunOneQuery();
+SQLStatementCountValidator.assertSelectCount(1);
+```
 
 ## API documentation
 
