@@ -2,6 +2,8 @@ English | [Português](README.pt.md)
 
 # back-template-spring
 
+[![CI](https://github.com/obrenoalvim/back-template-spring/actions/workflows/ci.yml/badge.svg)](https://github.com/obrenoalvim/back-template-spring/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Spring Boot backend template: Java 17, Maven, PostgreSQL + Flyway + Spring Data JPA, JWT auth via Spring Security, and a reference `Note` CRUD domain to copy for new resources. Sibling to `back-template-laravel` and `back-template-nest`.
 
 ## Features
