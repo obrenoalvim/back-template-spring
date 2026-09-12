@@ -108,7 +108,12 @@ public class AuthService {
   }
 
   public TokenResponse refresh(RefreshRequest req) {
-    var claims = jwtService.parse(req.refreshToken()).getPayload();
+    io.jsonwebtoken.Claims claims;
+    try {
+      claims = jwtService.parse(req.refreshToken()).getPayload();
+    } catch (io.jsonwebtoken.JwtException e) {
+      throw ApiException.unauthorized("Invalid refresh token");
+    }
     if (!"refresh".equals(claims.get("type", String.class))) {
       throw ApiException.unauthorized("Invalid refresh token");
     }

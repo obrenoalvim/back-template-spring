@@ -73,6 +73,14 @@ class AuthControllerLoginIntegrationTest extends AbstractIntegrationTest {
   }
 
   @Test
+  void refreshRejectsMalformedTokenWithUnauthorizedNotServerError() {
+    var resp =
+        restTemplate.postForEntity("/auth/refresh", Map.of("refreshToken", "not-a-jwt"), Map.class);
+
+    assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+  }
+
+  @Test
   void loginRejectsUnverifiedUser() {
     restTemplate.postForEntity(
         "/auth/register",
